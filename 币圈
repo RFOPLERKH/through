@@ -1,0 +1,81 @@
+import random
+
+class Player:
+    def __init__(self, name, balance=1000, portfolio=None):
+        self.name = name
+        self.balance = balance
+        self.portfolio = portfolio if portfolio is not None else {}
+    
+    def buy(self, symbol, amount, price):
+        cost = amount * price
+        if cost > self.balance:
+            print("Insufficient funds to buy.")
+            return False
+        else:
+            self.balance -= cost
+            if symbol in self.portfolio:
+                self.portfolio[symbol] += amount
+            else:
+                self.portfolio[symbol] = amount
+            print(f"Bought {amount} {symbol} for {cost} coins.")
+            return True
+    
+    def sell(self, symbol, amount, price):
+        if symbol not in self.portfolio or self.portfolio[symbol] < amount:
+            print("Not enough holdings to sell.")
+            return False
+        else:
+            self.balance += amount * price
+            self.portfolio[symbol] -= amount
+            print(f"Sold {amount} {symbol} for {amount * price} coins.")
+            return True
+
+class Market:
+    def __init__(self, symbols, initial_prices):
+        self.prices = {symbol: price for symbol, price in zip(symbols, initial_prices)}
+    
+    def update_prices(self):
+        for symbol in self.prices:
+            # Simulate price fluctuations
+            change = random.uniform(-0.1, 0.1) * self.prices[symbol]
+            self.prices[symbol] += change
+
+def main():
+    player = Player("Player1")
+    market = Market(["BTC", "ETH", "LTC"], [50000, 2000, 200])
+    
+    while True:
+        market.update_prices()
+        print("\nPrices:")
+        for symbol, price in market.prices.items():
+            print(f"{symbol}: {price}")
+        
+        print(f"\nBalance: {player.balance}")
+        print("Portfolio:")
+        for symbol, amount in player.portfolio.items():
+            print(f"{symbol}: {amount}")
+        
+        action = input("\nEnter 'buy', 'sell', or 'quit': ").lower()
+        
+        if action == "quit":
+            print("Thanks for playing!")
+            break
+        elif action == "buy":
+            symbol = input("Enter symbol to buy: ").upper()
+            amount = float(input("Enter amount to buy: "))
+            if symbol in market.prices:
+                player.buy(symbol, amount, market.prices[symbol])
+            else:
+                print("Invalid symbol.")
+        elif action == "sell":
+            symbol = input("Enter symbol to sell: ").upper()
+            amount = float(input("Enter amount to sell: "))
+            if symbol in market.prices:
+                player.sell(symbol, amount, market.prices[symbol])
+            else:
+                print("Invalid symbol.")
+        else:
+            print("Invalid action.")
+
+if __name__ == "__main__":
+    main()
